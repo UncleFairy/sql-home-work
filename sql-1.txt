@@ -1,0 +1,43 @@
+create or replace function weekType(my_date date default sysdate)
+
+return varchar2 as
+
+firstDayWeek date :=to_date('01.09.'||to_char(my_date,'yyyy'),'dd.mm.yyyy');
+
+nextMondayDate date:=NEXT_DAY(my_date ,'Monday');
+
+weekNumber number;
+
+begin
+
+  if my_date<firstDayWeek then
+
+    firstDayWeek :=to_date('01.09.'||(to_char(my_date,'yyyy')-1),'dd.mm.yyyy');
+
+  end if;
+
+  firstDayWeek :=NEXT_DAY(firstDayWeek ,'Monday');
+
+  weekNumber :=trunc((nextMondayDate - firstDayWeek )/7);
+
+  if mod(weekNumber ,2)=0 then 
+
+    return to_char(my_date,'dd.mm.yyyy')||' Нечётная неделя';
+
+  else
+
+    return to_char(my_date,'dd.mm.yyyy')||' Чётная неделя';
+
+  end if;
+
+end;
+
+/
+
+
+set serveroutput on
+
+exec dbms_output.put_line(weekType(to_date('07.11.1998','dd.mm.yyyy')));
+
+
+drop function weekType;
