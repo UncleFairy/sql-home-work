@@ -1,0 +1,117 @@
+CREATE OR REPLACE PACKAGE show_employees AS
+
+type mytext is table of varchar2(30) index by pls_integer;
+
+PROCEDURE get_emp(emp_id varchar2 default '0');
+
+PROCEDURE emp_insert(my_data mytext );
+PROCEDURE emp_form;
+
+END show_employees ;
+/
+show errors;
+
+CREATE OR REPLACE PACKAGE Body show_employees as
+
+PROCEDURE htm_head as
+begin
+
+HTP.HTMLOPEN;
+HTP.HEADOPEN;
+HTP.meta ('Content-Type', NULL, 'text/html;charset=utf-8');
+HTP.TITLE('LW 3 Pl/SQL');
+
+HTP.HEADCLOSE;
+HTP.BODYOPEN;
+end htm_head;
+
+PROCEDURE htm_bottom as
+begin
+
+HTP.BODYCLOSE;
+HTP.HTMLCLOSE;
+end htm_bottom;
+
+PROCEDURE emp_insert(my_data mytext) as
+begin
+
+INSERT INTO employees VALUES (my_data(1), my_data(2), my_data(3),my_data(4),my_data(5),my_data(6), my_data(7),my_data(8),my_data(9), my_data(10), my_data(11));
+get_emp(my_data(1));
+
+end emp_insert;
+
+PROCEDURE emp_form as
+begin
+
+htm_head;
+
+HTP.FORMOPEN('show_employees.emp_insert','POST');
+
+for rec in (SELECT column_name FROM user_tab_columns WHERE table_name='EMPLOYEES') loop
+HTP.FORMTEXT(cname=>'my_data',cattributes=>'placeholder="'||rec.column_name||'"');
+end loop;
+
+HTP.FORMSUBMIT;
+
+HTP.FORMCLOSE;
+
+htm_bottom;
+end emp_form;
+
+PROCEDURE get_emp(emp_id varchar2) as
+begin
+
+htm_head;
+
+HTP.header (1,'Employeers');
+
+HTp.ANCHOR('show_employees.emp_form','New Employeer');
+
+HTP.TABLEOPEN('border=1');
+
+htp.tablerowopen;
+
+for rec in (SELECT column_name FROM user_tab_columns WHERE table_name='EMPLOYEES') loop
+htp.TABLEHEADER(rec.column_name);
+end loop;
+
+htp.tablerowclose;
+
+for rec in (select * from employees) loop
+htp.tablerowopen;
+if rec.EMPLOYEE_ID=to_number(emp_id) then
+htp.TABLEDATA(htf.bold(rec.EMPLOYEE_ID));
+htp.TABLEDATA(htf.bold(rec.FIRST_NAME));
+htp.TABLEDATA(htf.bold(rec.LAST_NAME));
+htp.TABLEDATA(htf.bold(rec.EMAIL));
+htp.TABLEDATA(htf.bold(rec.PHONE_NUMBER));
+htp.TABLEDATA(htf.bold(rec.HIRE_DATE));
+htp.TABLEDATA(htf.bold(rec.JOB_ID));
+htp.TABLEDATA(htf.bold(rec.SALARY));
+htp.TABLEDATA(htf.bold(rec.COMMISSION_PCT));
+htp.TABLEDATA(htf.bold(rec.MANAGER_ID));
+htp.TABLEDATA(htf.bold(rec.DEPARTMENT_ID));
+else
+htp.TABLEDATA(rec.EMPLOYEE_ID);
+htp.TABLEDATA(rec.FIRST_NAME);
+htp.TABLEDATA(rec.LAST_NAME);
+htp.TABLEDATA(rec.EMAIL);
+htp.TABLEDATA(rec.PHONE_NUMBER);
+htp.TABLEDATA(rec.HIRE_DATE );
+htp.TABLEDATA(rec.JOB_ID);
+htp.TABLEDATA(rec.SALARY);
+htp.TABLEDATA(rec.COMMISSION_PCT);
+htp.TABLEDATA(rec.MANAGER_ID);
+htp.TABLEDATA(rec.DEPARTMENT_ID);
+end if;
+htp.tablerowclose;
+end loop;
+
+HTP.TABLECLOSE;
+
+htm_bottom;
+end get_emp;
+
+END show_employees ;
+/
+show errors;
