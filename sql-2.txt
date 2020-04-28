@@ -1,0 +1,127 @@
+CREATE OR REPLACE PACKAGE show_rab AS
+
+PROCEDURE get_dep;
+PROCEDURE get_emp(dev_id departments.department_id%type);
+
+
+PROCEDURE dev_int(dev_id VARCHAR2,dev_name VARCHAR2,man_id VARCHAR2,dev_location VARCHAR2);
+PROCEDURE dev_form;
+
+END show_rab;
+/
+
+
+CREATE OR REPLACE PACKAGE Body show_rab as
+
+PROCEDURE htm_head as
+begin
+
+
+HTP.HTMLOPEN;
+HTP.HEADOPEN;
+HTP.meta ('Content-Type', NULL, 'text/html;charset=utf-8');
+HTP.TITLE('LB Pl/SQL');
+
+HTP.HEADCLOSE;
+HTP.BODYOPEN;
+
+end htm_head;
+
+PROCEDURE htm_bottom as
+begin
+
+HTP.BODYCLOSE;
+HTP.HTMLCLOSE;
+end htm_bottom;
+
+PROCEDURE get_emp(dev_id departments.department_id%type) as
+begin
+
+htm_head;
+
+HTP.header (1,'Department '||dev_id);
+
+HTP.TABLEOPEN('border=1');
+
+htp.tablerowopen;
+htp.TABLEHEADER('FIRST NAME');
+htp.TABLEHEADER('LAST NAME');
+htp.TABLEHEADER('SALARY');
+htp.tablerowclose;
+
+for rec in (select FIRST_NAME,LAST_NAME,SALARY from employees where department_id=dev_id) loop
+htp.tablerowopen;
+htp.TABLEDATA(rec.FIRST_NAME);
+htp.TABLEDATA(rec.LAST_NAME);
+htp.TABLEDATA(rec.SALARY);
+htp.tablerowclose;
+end loop;
+
+HTP.TABLECLOSE;
+
+htm_bottom;
+
+end get_emp;
+
+PROCEDURE get_dep as
+begin
+
+htm_head;
+
+HTp.ANCHOR('show_rab.dev_form','New Department');
+
+HTP.TABLEOPEN('border=1');
+
+htp.tablerowopen;
+htp.TABLEHEADER('DEPARTMENT ID');
+htp.TABLEHEADER('DEPARTMENT NAME');
+htp.tablerowclose;
+
+for rec in (select DEPARTMENT_ID,DEPARTMENT_NAME from DEPARTMENTS) loop
+htp.tablerowopen;
+htp.TABLEDATA(HTf.ANCHOR('show_rab.get_emp?dev_id='||rec.DEPARTMENT_ID,rec.DEPARTMENT_ID));
+htp.TABLEDATA(rec.DEPARTMENT_NAME);
+htp.tablerowclose;
+end loop;
+
+HTP.TABLECLOSE;
+
+htm_bottom;
+
+end get_dep;
+
+PROCEDURE dev_form as
+
+begin
+
+htm_head;
+
+HTP.FORMOPEN('show_rab.dev_int','POST');
+
+HTP.FORMTEXT('dev_id');
+
+HTP.FORMTEXT('dev_name');
+
+HTP.FORMTEXT('man_id');
+
+HTP.FORMTEXT('dev_location');
+
+HTP.FORMSUBMIT;
+
+HTP.FORMCLOSE;
+
+htm_bottom;
+
+end dev_form;
+
+PROCEDURE dev_int(dev_id VARCHAR2,dev_name VARCHAR2,man_id VARCHAR2,dev_location VARCHAR2) as
+
+begin
+               INSERT INTO departments
+               VALUES (dev_id , dev_name , man_id , dev_location );
+  get_dep;
+
+end dev_int;
+
+END show_rab;
+/
