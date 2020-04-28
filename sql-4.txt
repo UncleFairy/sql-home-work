@@ -1,0 +1,19 @@
+CREATE OR REPLACE TRIGGER departments_trigger
+before insert or update of department_id
+on EMPLOYEES
+FOR EACH ROW
+DECLARE
+COUNT_DEPARTMENTS NUMBER;
+begin
+SELECT count(department_id) into COUNT_DEPARTMENTS FROM DEPARTMENTS where DEPARTMENT_ID = :NEW.DEPARTMENT_ID;
+if COUNT_DEPARTMENTS = 0 then
+INSERT INTO DEPARTMENTS (DEPARTMENT_ID, DEPARTMENT_NAME, MANAGER_ID)
+VALUES (:NEW.DEPARTMENT_ID, 'NEW DEPARTMENT' || :NEW.DEPARTMENT_ID, 100);
+end if;
+end;
+
+CREATE OR REPLACE TRIGGER salary_trigger
+before insert or update of salary on EMPLOYEES FOR EACH ROW when ( MOD(to_char(SYSDATE, 'MI'), 2) = 0 )
+begin
+RAISE_APPLICATION_ERROR(-20202, 'You cannot update salary now');
+end;
